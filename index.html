@@ -118,23 +118,21 @@ font-size:32px;
 
 <body>
 
-<!-- START SCREEN -->
 <div id="startScreen">
-<button id="startBtn" onclick="startGame()">START</button>
+<button id="startBtn">START</button>
 </div>
 
-<!-- GAME AREA -->
 <div id="game">
 
 <div id="timer">30</div>
 <div id="score">0 - 0</div>
 
 <div class="player" id="p1">
-<button class="tapBtn" onclick="tap(1)" disabled>TAP</button>
+<button class="tapBtn" id="btn1" disabled>TAP</button>
 </div>
 
 <div class="player" id="p2">
-<button class="tapBtn" onclick="tap(2)" disabled>TAP</button>
+<button class="tapBtn" id="btn2" disabled>TAP</button>
 </div>
 
 </div>
@@ -149,6 +147,14 @@ let p1=0;
 let p2=0;
 let timer;
 let gameRunning=false;
+
+const btn1=document.getElementById("btn1");
+const btn2=document.getElementById("btn2");
+
+document.getElementById("startBtn").addEventListener("click",startGame);
+
+btn1.addEventListener("touchstart",()=>tap(1));
+btn2.addEventListener("touchstart",()=>tap(2));
 
 function startGame(){
 
@@ -186,9 +192,8 @@ p2=0;
 
 gameRunning=true;
 
-document.querySelectorAll(".tapBtn").forEach(btn=>{
-btn.disabled=false;
-});
+btn1.disabled=false;
+btn2.disabled=false;
 
 timer=setInterval(()=>{
 
@@ -207,7 +212,7 @@ function tap(player){
 
 if(!gameRunning) return;
 
-if(player==1){
+if(player===1){
 p1++;
 }
 else{
@@ -221,15 +226,12 @@ document.getElementById("score").innerText=p1+" - "+p2;
 function endGame(){
 
 clearInterval(timer);
-
 gameRunning=false;
 
-document.querySelectorAll(".tapBtn").forEach(btn=>{
-btn.disabled=true;
-});
+btn1.disabled=true;
+btn2.disabled=true;
 
 let win=document.getElementById("winScreen");
-
 win.style.display="flex";
 
 if(p1>p2){
