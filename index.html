@@ -15,89 +15,57 @@ text-align:center;
 overflow:hidden;
 }
 
-h1{
-font-size:20px;
-margin:10px;
+h1{font-size:20px;margin:6px;}
+
+input,select{
+padding:6px;
+margin:4px;
+border-radius:6px;
+border:none;
+text-align:center;
 }
 
 #timer{
 font-size:26px;
 color:#ff4757;
 font-weight:bold;
+margin:5px;
 }
 
 #score{
-font-size:20px;
+font-size:22px;
 margin:5px;
 }
 
 #result{
-font-size:22px;
+font-size:26px;
 font-weight:bold;
-margin:5px;
-}
-
-.container{
-display:flex;
-height:42vh;
+margin:8px;
 }
 
 .player{
-flex:1;
+height:35vh;
 display:flex;
-flex-direction:column;
 justify-content:center;
 align-items:center;
 }
 
+#p1{background:#1e90ff;}
+#p2{background:#ff69b4;}
+
 .tapBtn{
 width:85%;
-height:120px;
+height:100px;
 font-size:22px;
 font-weight:bold;
 border:none;
 border-radius:20px;
 color:white;
-margin-top:10px;
-}
-
-#p1{
-background:linear-gradient(45deg,#00ff88,#00c853);
-}
-
-#p2{
-background:linear-gradient(45deg,#2196F3,#0d47a1);
+background:rgba(0,0,0,0.4);
 }
 
 .tapBtn:active{
 transform:scale(0.95);
-}
-
-.hp{
-width:80%;
-height:18px;
-background:#444;
-border-radius:10px;
-margin-top:8px;
-overflow:hidden;
-}
-
-.hp-bar{
-height:100%;
-width:100%;
-background:limegreen;
-transition:0.2s;
-}
-
-#boost{
-margin:8px;
-padding:10px 18px;
-font-size:16px;
-border:none;
-border-radius:8px;
-background:#ff9800;
-color:white;
-font-weight:bold;
 }
 
 #start{
@@ -110,30 +78,41 @@ font-weight:bold;
 margin:5px;
 }
 
-.shake{
-animation:shake 0.2s;
-}
-
-@keyframes shake{
-0%{transform:translate(0,0);}
-25%{transform:translate(-5px,5px);}
-50%{transform:translate(5px,-5px);}
-75%{transform:translate(-5px,5px);}
-100%{transform:translate(0,0);}
-}
-
-/* 🔨 HAMMER EFFECT */
-.hammer{
+/* Countdown */
+#countdown{
+font-size:60px;
+font-weight:bold;
 position:fixed;
-font-size:40px;
-pointer-events:none;
-animation:hammerHit 0.3s ease-out;
+top:40%;
+width:100%;
+display:none;
 }
 
-@keyframes hammerHit{
-0%{transform:scale(1) rotate(0deg);opacity:1;}
-50%{transform:scale(1.5) rotate(-20deg);}
-100%{transform:scale(0.5) rotate(20deg);opacity:0;}
+/* Win Screen */
+#winScreen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+display:none;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+font-size:32px;
+animation:pop 0.5s ease;
+}
+
+@keyframes pop{
+0%{transform:scale(0);}
+100%{transform:scale(1);}
+}
+
+.moto{
+font-size:14px;
+margin:5px;
+color:#ffd700;
 }
 
 </style>
@@ -142,54 +121,99 @@ animation:hammerHit 0.3s ease-out;
 <body>
 
 <h1>🔥 TAP BATTLE 🔥</h1>
+<div class="moto">"Fight Fast. Tap Hard. Win Big!"</div>
+
+<input id="player1" placeholder="Player 1 Name">
+<select id="char1">
+<option value="👦">Boy</option>
+<option value="👧">Girl</option>
+</select>
+
+<br>
+
+<input id="player2" placeholder="Player 2 Name">
+<select id="char2">
+<option value="👦">Boy</option>
+<option value="👧">Girl</option>
+</select>
+
+<br>
 
 <div id="timer">30</div>
 <div id="score">0 - 0</div>
 <div id="result"></div>
 
-<div class="container">
-
-<div class="player">
-<div>Player 1</div>
-<div class="hp"><div id="hp1" class="hp-bar"></div></div>
-<button id="p1" class="tapBtn" onclick="tap(1)" disabled>TAP</button>
+<div class="player" id="p1">
+<button class="tapBtn" onclick="tap(1)" disabled>TAP</button>
 </div>
 
-<div class="player">
-<div>Player 2</div>
-<div class="hp"><div id="hp2" class="hp-bar"></div></div>
-<button id="p2" class="tapBtn" onclick="tap(2)" disabled>TAP</button>
-</div>
-
+<div class="player" id="p2">
+<button class="tapBtn" onclick="tap(2)" disabled>TAP</button>
 </div>
 
 <button id="start" onclick="startGame()">START</button>
-<button id="boost" onclick="boost()">⚡ BOOST</button>
+
+<div id="countdown"></div>
+
+<div id="winScreen"></div>
 
 <script>
 
 let time=30;
 let p1=0,p2=0;
-let hp1=100,hp2=100;
-let boost1=false,boost2=false;
-let gameRunning=false;
 let timer;
+let gameRunning=false;
 
 function startGame(){
 
-clearInterval(timer);
+let name1=document.getElementById("player1").value.trim();
+let name2=document.getElementById("player2").value.trim();
+
+if(name1=="" || name2==""){
+alert("Enter both player names!");
+return;
+}
+
+countDownStart();
+
+}
+
+function countDownStart(){
+
+let count=3;
+let cd=document.getElementById("countdown");
+cd.style.display="block";
+cd.innerText=count;
+
+let interval=setInterval(()=>{
+
+count--;
+if(count>0){
+cd.innerText=count;
+}
+else{
+clearInterval(interval);
+cd.style.display="none";
+beginGame();
+}
+
+},1000);
+
+}
+
+function beginGame(){
 
 time=30;
-p1=0;p2=0;
-hp1=100;hp2=100;
+p1=0;
+p2=0;
 gameRunning=true;
 
-document.getElementById("p1").disabled=false;
-document.getElementById("p2").disabled=false;
+document.querySelectorAll(".tapBtn").forEach(btn=>{
+btn.disabled=false;
+});
 
-updateHP();
-document.getElementById("result").innerText="";
 document.getElementById("score").innerText="0 - 0";
+document.getElementById("result").innerText="";
 
 timer=setInterval(()=>{
 
@@ -206,67 +230,11 @@ function tap(player){
 
 if(!gameRunning) return;
 
-if(player==1){
-p1++;
-damage(2);
-}
-else{
-p2++;
-damage(1);
-}
+if(player==1) p1++;
+if(player==2) p2++;
 
 document.getElementById("score").innerText=
 p1+" - "+p2;
-
-screenShake();
-
-/* 🔨 Hammer Effect */
-let hammer=document.createElement("div");
-hammer.className="hammer";
-hammer.innerText="🔨";
-hammer.style.left=event.clientX+"px";
-hammer.style.top=event.clientY+"px";
-document.body.appendChild(hammer);
-
-setTimeout(()=>{hammer.remove();},300);
-
-}
-
-function damage(target){
-
-let dmg=5;
-
-if(target==1 && boost1) dmg=10;
-if(target==2 && boost2) dmg=10;
-
-if(target==1) hp1-=dmg;
-if(target==2) hp2-=dmg;
-
-if(hp1<0) hp1=0;
-if(hp2<0) hp2=0;
-
-updateHP();
-
-}
-
-function updateHP(){
-
-document.getElementById("hp1").style.width=hp1+"%";
-document.getElementById("hp2").style.width=hp2+"%";
-
-}
-
-function boost(){
-
-if(!gameRunning) return;
-
-if(p1>p2) boost1=true;
-else boost2=true;
-
-setTimeout(()=>{
-boost1=false;
-boost2=false;
-},5000);
 
 }
 
@@ -275,25 +243,29 @@ function endGame(){
 clearInterval(timer);
 gameRunning=false;
 
-document.getElementById("p1").disabled=true;
-document.getElementById("p2").disabled=true;
+document.querySelectorAll(".tapBtn").forEach(btn=>{
+btn.disabled=true;
+});
 
-let result="";
+let name1=document.getElementById("player1").value;
+let name2=document.getElementById("player2").value;
+let char1=document.getElementById("char1").value;
+let char2=document.getElementById("char2").value;
 
-if(hp1>hp2) result="🏆 Player 1 Wins!";
-else if(hp2>hp1) result="🏆 Player 2 Wins!";
-else result="🤝 Draw!";
+let winScreen=document.getElementById("winScreen");
+winScreen.style.display="flex";
 
-document.getElementById("result").innerText=result;
-
+if(p1>p2){
+winScreen.innerHTML=
+char1+" "+name1+" WINS! 🏆<br><br>🔥 BIG WIN!";
 }
-
-function screenShake(){
-
-document.body.classList.add("shake");
-setTimeout(()=>{
-document.body.classList.remove("shake");
-},200);
+else if(p2>p1){
+winScreen.innerHTML=
+char2+" "+name2+" WINS! 🏆<br><br>🔥 BIG WIN!";
+}
+else{
+winScreen.innerHTML="🤝 DRAW!";
+}
 
 }
 
