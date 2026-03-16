@@ -1,120 +1,202 @@
 <!DOCTYPE html>
-
 <html>
 <head>
-<title>Office Tap Battle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap Battle Ultimate</title>
 
 <style>
+
 body{
-font-family: Arial;
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
 text-align:center;
-margin-top:40px;
-background:#eef2f3;
+overflow:hidden;
+}
+
+h1{
+font-size:20px;
+margin:10px;
 }
 
 #timer{
-font-size:28px;
-color:red;
-margin:15px;
-}
-
-#score{
-font-size:22px;
-margin:15px;
-}
-
-#coins{
-font-size:20px;
-margin:10px;
-color:green;
-}
-
-#result{
 font-size:26px;
-margin:15px;
-color:blue;
+color:#ff4757;
 font-weight:bold;
 }
 
-input{
-padding:8px;
-font-size:16px;
+#score{
+font-size:20px;
 margin:5px;
 }
 
-button{
-font-size:18px;
-padding:12px 20px;
-margin:8px;
-border:none;
-border-radius:6px;
-cursor:pointer;
+#result{
+font-size:22px;
+font-weight:bold;
+margin:5px;
 }
 
-#p1{background:#4CAF50;color:white;}
-#p2{background:#2196F3;color:white;}
-#start{background:black;color:white;}
+.container{
+display:flex;
+height:42vh;
+}
+
+.player{
+flex:1;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+}
+
+.tapBtn{
+width:85%;
+height:120px;
+font-size:22px;
+font-weight:bold;
+border:none;
+border-radius:20px;
+color:white;
+margin-top:10px;
+}
+
+#p1{
+background:linear-gradient(45deg,#00ff88,#00c853);
+}
+
+#p2{
+background:linear-gradient(45deg,#2196F3,#0d47a1);
+}
+
+.tapBtn:active{
+transform:scale(0.95);
+}
+
+.hp{
+width:80%;
+height:18px;
+background:#444;
+border-radius:10px;
+margin-top:8px;
+overflow:hidden;
+}
+
+.hp-bar{
+height:100%;
+width:100%;
+background:limegreen;
+transition:0.2s;
+}
+
+#boost{
+margin:8px;
+padding:10px 18px;
+font-size:16px;
+border:none;
+border-radius:8px;
+background:#ff9800;
+color:white;
+font-weight:bold;
+}
+
+#start{
+padding:10px 20px;
+border:none;
+border-radius:8px;
+background:black;
+color:white;
+font-weight:bold;
+margin:5px;
+}
+
+.shake{
+animation:shake 0.2s;
+}
+
+@keyframes shake{
+0%{transform:translate(0,0);}
+25%{transform:translate(-5px,5px);}
+50%{transform:translate(5px,-5px);}
+75%{transform:translate(-5px,5px);}
+100%{transform:translate(0,0);}
+}
+
+/* 🔨 HAMMER EFFECT */
+.hammer{
+position:fixed;
+font-size:40px;
+pointer-events:none;
+animation:hammerHit 0.3s ease-out;
+}
+
+@keyframes hammerHit{
+0%{transform:scale(1) rotate(0deg);opacity:1;}
+50%{transform:scale(1.5) rotate(-20deg);}
+100%{transform:scale(0.5) rotate(20deg);opacity:0;}
+}
 
 </style>
-
 </head>
 
 <body>
 
-<h1>🔥 Office Tap Battle 🔥</h1>
+<h1>🔥 TAP BATTLE 🔥</h1>
 
-<input id="player1" placeholder="Player 1 Name">
-<input id="player2" placeholder="Player 2 Name">
-
-<div id="timer">Time: 30</div>
-
-<div id="score">Score: 0 - 0</div>
-
-<div id="coins">Coins: 0 - 0</div>
-
+<div id="timer">30</div>
+<div id="score">0 - 0</div>
 <div id="result"></div>
 
-<br>
+<div class="container">
 
-<button id="p1" onclick="tap(1)" disabled>Player 1 TAP</button> <button id="p2" onclick="tap(2)" disabled>Player 2 TAP</button>
+<div class="player">
+<div>Player 1</div>
+<div class="hp"><div id="hp1" class="hp-bar"></div></div>
+<button id="p1" class="tapBtn" onclick="tap(1)" disabled>TAP</button>
+</div>
 
-<br>
+<div class="player">
+<div>Player 2</div>
+<div class="hp"><div id="hp2" class="hp-bar"></div></div>
+<button id="p2" class="tapBtn" onclick="tap(2)" disabled>TAP</button>
+</div>
+
+</div>
 
 <button id="start" onclick="startGame()">START</button>
+<button id="boost" onclick="boost()">⚡ BOOST</button>
 
 <script>
 
-let time = 30;
-let p1 = 0;
-let p2 = 0;
-let coin1 = 0;
-let coin2 = 0;
-let gameRunning = false;
+let time=30;
+let p1=0,p2=0;
+let hp1=100,hp2=100;
+let boost1=false,boost2=false;
+let gameRunning=false;
 let timer;
 
 function startGame(){
 
-clearInterval(timer); // prevent double timer
+clearInterval(timer);
 
-p1 = 0;
-p2 = 0;
-time = 30;
-gameRunning = true;
+time=30;
+p1=0;p2=0;
+hp1=100;hp2=100;
+gameRunning=true;
 
-document.getElementById("result").innerText = "";
-document.getElementById("p1").disabled = false;
-document.getElementById("p2").disabled = false;
+document.getElementById("p1").disabled=false;
+document.getElementById("p2").disabled=false;
 
-document.getElementById("score").innerText = "Score: 0 - 0";
+updateHP();
+document.getElementById("result").innerText="";
+document.getElementById("score").innerText="0 - 0";
 
-timer = setInterval(function(){
+timer=setInterval(()=>{
 
 time--;
-document.getElementById("timer").innerText = "Time: " + time;
+document.getElementById("timer").innerText=time;
 
-if(time <= 0){
-endGame();
-}
+if(time<=0) endGame();
 
 },1000);
 
@@ -124,47 +206,94 @@ function tap(player){
 
 if(!gameRunning) return;
 
-if(player === 1) p1++;
-if(player === 2) p2++;
+if(player==1){
+p1++;
+damage(2);
+}
+else{
+p2++;
+damage(1);
+}
 
-document.getElementById("score").innerText =
-"Score: " + p1 + " - " + p2;
+document.getElementById("score").innerText=
+p1+" - "+p2;
+
+screenShake();
+
+/* 🔨 Hammer Effect */
+let hammer=document.createElement("div");
+hammer.className="hammer";
+hammer.innerText="🔨";
+hammer.style.left=event.clientX+"px";
+hammer.style.top=event.clientY+"px";
+document.body.appendChild(hammer);
+
+setTimeout(()=>{hammer.remove();},300);
+
+}
+
+function damage(target){
+
+let dmg=5;
+
+if(target==1 && boost1) dmg=10;
+if(target==2 && boost2) dmg=10;
+
+if(target==1) hp1-=dmg;
+if(target==2) hp2-=dmg;
+
+if(hp1<0) hp1=0;
+if(hp2<0) hp2=0;
+
+updateHP();
+
+}
+
+function updateHP(){
+
+document.getElementById("hp1").style.width=hp1+"%";
+document.getElementById("hp2").style.width=hp2+"%";
+
+}
+
+function boost(){
+
+if(!gameRunning) return;
+
+if(p1>p2) boost1=true;
+else boost2=true;
+
+setTimeout(()=>{
+boost1=false;
+boost2=false;
+},5000);
 
 }
 
 function endGame(){
 
 clearInterval(timer);
-gameRunning = false;
+gameRunning=false;
 
-document.getElementById("p1").disabled = true;
-document.getElementById("p2").disabled = true;
+document.getElementById("p1").disabled=true;
+document.getElementById("p2").disabled=true;
 
-let name1 = document.getElementById("player1").value || "Player 1";
-let name2 = document.getElementById("player2").value || "Player 2";
+let result="";
 
-let result = "";
+if(hp1>hp2) result="🏆 Player 1 Wins!";
+else if(hp2>hp1) result="🏆 Player 2 Wins!";
+else result="🤝 Draw!";
 
-if(p1 > p2){
-coin1 += 100;
-coin2 += 20;
-result = name1 + " Wins! 🏆";
-}
-else if(p2 > p1){
-coin2 += 100;
-coin1 += 20;
-result = name2 + " Wins! 🏆";
-}
-else{
-coin1 += 50;
-coin2 += 50;
-result = "Draw! 🤝";
+document.getElementById("result").innerText=result;
+
 }
 
-document.getElementById("coins").innerText =
-"Coins: " + coin1 + " - " + coin2;
+function screenShake(){
 
-document.getElementById("result").innerText = result;
+document.body.classList.add("shake");
+setTimeout(()=>{
+document.body.classList.remove("shake");
+},200);
 
 }
 
