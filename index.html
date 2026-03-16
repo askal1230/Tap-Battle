@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Tap Battle</title>
 
 <style>
+
 html,body{
 margin:0;
 padding:0;
@@ -14,6 +17,7 @@ font-family:Arial;
 background:#111;
 color:white;
 text-align:center;
+touch-action:manipulation;
 }
 
 #startScreen{
@@ -27,7 +31,7 @@ align-items:center;
 
 #startBtn{
 padding:20px 50px;
-font-size:26px;
+font-size:28px;
 border:none;
 border-radius:15px;
 background:#00c853;
@@ -59,8 +63,13 @@ justify-content:center;
 align-items:center;
 }
 
-#p1{background:#0072ff;}
-#p2{background:#ff4b2b;}
+#p1{
+background:#0072ff;
+}
+
+#p2{
+background:#ff4b2b;
+}
 
 .tapBtn{
 width:90%;
@@ -103,15 +112,18 @@ justify-content:center;
 align-items:center;
 font-size:32px;
 }
+
 </style>
 </head>
 
 <body>
 
+<!-- START SCREEN -->
 <div id="startScreen">
 <button id="startBtn" onclick="startGame()">START</button>
 </div>
 
+<!-- GAME AREA -->
 <div id="game">
 
 <div id="timer">30</div>
@@ -133,7 +145,8 @@ font-size:32px;
 <script>
 
 let time=30;
-let p1=0,p2=0;
+let p1=0;
+let p2=0;
 let timer;
 let gameRunning=false;
 
@@ -142,9 +155,9 @@ function startGame(){
 document.getElementById("startScreen").style.display="none";
 document.getElementById("game").style.display="block";
 
-/* Countdown */
 let count=3;
 let cd=document.getElementById("countdown");
+
 cd.style.display="block";
 cd.innerText=count;
 
@@ -154,7 +167,8 @@ count--;
 
 if(count>0){
 cd.innerText=count;
-}else{
+}
+else{
 clearInterval(interval);
 cd.style.display="none";
 beginBattle();
@@ -169,6 +183,7 @@ function beginBattle(){
 time=30;
 p1=0;
 p2=0;
+
 gameRunning=true;
 
 document.querySelectorAll(".tapBtn").forEach(btn=>{
@@ -180,7 +195,9 @@ timer=setInterval(()=>{
 time--;
 document.getElementById("timer").innerText=time;
 
-if(time<=0) endGame();
+if(time<=0){
+endGame();
+}
 
 },1000);
 
@@ -190,17 +207,21 @@ function tap(player){
 
 if(!gameRunning) return;
 
-if(player==1) p1++;
-if(player==2) p2++;
+if(player==1){
+p1++;
+}
+else{
+p2++;
+}
 
-document.getElementById("score").innerText=
-p1+" - "+p2;
+document.getElementById("score").innerText=p1+" - "+p2;
 
 }
 
 function endGame(){
 
 clearInterval(timer);
+
 gameRunning=false;
 
 document.querySelectorAll(".tapBtn").forEach(btn=>{
@@ -208,6 +229,7 @@ btn.disabled=true;
 });
 
 let win=document.getElementById("winScreen");
+
 win.style.display="flex";
 
 if(p1>p2){
