@@ -5,7 +5,6 @@
 <title>Tap Battle</title>
 
 <style>
-
 html,body{
 margin:0;
 padding:0;
@@ -24,12 +23,11 @@ height:100%;
 display:flex;
 justify-content:center;
 align-items:center;
-flex-direction:column;
 }
 
 #startBtn{
-padding:20px 40px;
-font-size:24px;
+padding:20px 50px;
+font-size:26px;
 border:none;
 border-radius:15px;
 background:#00c853;
@@ -43,7 +41,7 @@ height:100%;
 }
 
 #timer{
-font-size:26px;
+font-size:28px;
 font-weight:bold;
 color:red;
 margin:5px;
@@ -67,7 +65,7 @@ align-items:center;
 .tapBtn{
 width:90%;
 height:120px;
-font-size:26px;
+font-size:28px;
 font-weight:bold;
 border:none;
 border-radius:20px;
@@ -87,7 +85,7 @@ opacity:0.5;
 position:fixed;
 top:40%;
 width:100%;
-font-size:80px;
+font-size:90px;
 font-weight:bold;
 display:none;
 }
@@ -103,21 +101,17 @@ display:none;
 flex-direction:column;
 justify-content:center;
 align-items:center;
-font-size:30px;
+font-size:32px;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- START SCREEN -->
 <div id="startScreen">
-<h1>🔥 TAP BATTLE 🔥</h1>
 <button id="startBtn" onclick="startGame()">START</button>
 </div>
 
-<!-- GAME -->
 <div id="game">
 
 <div id="timer">30</div>
@@ -148,7 +142,7 @@ function startGame(){
 document.getElementById("startScreen").style.display="none";
 document.getElementById("game").style.display="block";
 
-/* Countdown 3-2-1 */
+/* Countdown */
 let count=3;
 let cd=document.getElementById("countdown");
 cd.style.display="block";
