@@ -17,18 +17,24 @@ color:white;
 text-align:center;
 }
 
-h1{font-size:18px;margin:6px;}
-
-input,select{
-padding:6px;
-margin:4px;
-border-radius:6px;
-border:none;
-text-align:center;
+#startScreen{
+position:absolute;
+width:100%;
+height:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
 }
 
-#setup{
-padding:10px;
+#startBtn{
+padding:20px 40px;
+font-size:24px;
+border:none;
+border-radius:15px;
+background:#00c853;
+color:white;
+font-weight:bold;
 }
 
 #game{
@@ -37,14 +43,15 @@ height:100%;
 }
 
 #timer{
-font-size:24px;
-color:red;
+font-size:26px;
 font-weight:bold;
+color:red;
+margin:5px;
 }
 
 #score{
 font-size:22px;
-margin:4px;
+margin:5px;
 }
 
 .player{
@@ -72,21 +79,15 @@ background:rgba(0,0,0,0.4);
 transform:scale(0.95);
 }
 
-#startBtn{
-padding:10px 20px;
-border:none;
-border-radius:8px;
-background:black;
-color:white;
-font-weight:bold;
-margin:6px;
+.tapBtn:disabled{
+opacity:0.5;
 }
 
 #countdown{
 position:fixed;
 top:40%;
 width:100%;
-font-size:70px;
+font-size:80px;
 font-weight:bold;
 display:none;
 }
@@ -110,32 +111,13 @@ font-size:30px;
 
 <body>
 
+<!-- START SCREEN -->
+<div id="startScreen">
 <h1>🔥 TAP BATTLE 🔥</h1>
-
-<!-- SETUP SCREEN -->
-<div id="setup">
-
-<input id="player1" placeholder="Player 1 Name">
-<select id="char1">
-<option value="👦">Boy</option>
-<option value="👧">Girl</option>
-</select>
-
-<br>
-
-<input id="player2" placeholder="Player 2 Name">
-<select id="char2">
-<option value="👦">Boy</option>
-<option value="👧">Girl</option>
-</select>
-
-<br>
-
-<button id="startBtn" onclick="startGame()">START GAME</button>
-
+<button id="startBtn" onclick="startGame()">START</button>
 </div>
 
-<!-- GAME SCREEN -->
+<!-- GAME -->
 <div id="game">
 
 <div id="timer">30</div>
@@ -163,19 +145,10 @@ let gameRunning=false;
 
 function startGame(){
 
-let name1=document.getElementById("player1").value.trim();
-let name2=document.getElementById("player2").value.trim();
-
-if(name1=="" || name2==""){
-alert("Enter both names!");
-return;
-}
-
-/* Hide setup, show game */
-document.getElementById("setup").style.display="none";
+document.getElementById("startScreen").style.display="none";
 document.getElementById("game").style.display="block";
 
-/* Countdown */
+/* Countdown 3-2-1 */
 let count=3;
 let cd=document.getElementById("countdown");
 cd.style.display="block";
@@ -184,19 +157,20 @@ cd.innerText=count;
 let interval=setInterval(()=>{
 
 count--;
+
 if(count>0){
 cd.innerText=count;
 }else{
 clearInterval(interval);
 cd.style.display="none";
-beginGame();
+beginBattle();
 }
 
 },1000);
 
 }
 
-function beginGame(){
+function beginBattle(){
 
 time=30;
 p1=0;
@@ -206,8 +180,6 @@ gameRunning=true;
 document.querySelectorAll(".tapBtn").forEach(btn=>{
 btn.disabled=false;
 });
-
-document.getElementById("score").innerText="0 - 0";
 
 timer=setInterval(()=>{
 
@@ -241,19 +213,14 @@ document.querySelectorAll(".tapBtn").forEach(btn=>{
 btn.disabled=true;
 });
 
-let name1=document.getElementById("player1").value;
-let name2=document.getElementById("player2").value;
-let char1=document.getElementById("char1").value;
-let char2=document.getElementById("char2").value;
-
 let win=document.getElementById("winScreen");
 win.style.display="flex";
 
 if(p1>p2){
-win.innerHTML=char1+" "+name1+" WINS! 🏆";
+win.innerHTML="🏆 PLAYER 1 WINS!";
 }
 else if(p2>p1){
-win.innerHTML=char2+" "+name2+" WINS! 🏆";
+win.innerHTML="🏆 PLAYER 2 WINS!";
 }
 else{
 win.innerHTML="🤝 DRAW!";
