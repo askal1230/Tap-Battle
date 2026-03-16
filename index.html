@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Office Tap Battle</title>
+
+<style>
+body{
+font-family: Arial;
+text-align:center;
+margin-top:40px;
+background:#eef2f3;
+}
+
+#timer{
+font-size:28px;
+color:red;
+margin:15px;
+}
+
+#score{
+font-size:22px;
+margin:15px;
+}
+
+#coins{
+font-size:20px;
+margin:10px;
+color:green;
+}
+
+#result{
+font-size:26px;
+margin:15px;
+color:blue;
+font-weight:bold;
+}
+
+input{
+padding:8px;
+font-size:16px;
+margin:5px;
+}
+
+button{
+font-size:18px;
+padding:12px 20px;
+margin:8px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+#p1{background:#4CAF50;color:white;}
+#p2{background:#2196F3;color:white;}
+#start{background:black;color:white;}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🔥 Office Tap Battle 🔥</h1>
+
+<input id="player1" placeholder="Player 1 Name">
+<input id="player2" placeholder="Player 2 Name">
+
+<div id="timer">Time: 30</div>
+
+<div id="score">Score: 0 - 0</div>
+
+<div id="coins">Coins: 0 - 0</div>
+
+<div id="result"></div>
+
+<br>
+
+<button id="p1" onclick="tap(1)" disabled>Player 1 TAP</button> <button id="p2" onclick="tap(2)" disabled>Player 2 TAP</button>
+
+<br>
+
+<button id="start" onclick="startGame()">START</button>
+
+<script>
+
+let time = 30;
+let p1 = 0;
+let p2 = 0;
+let coin1 = 0;
+let coin2 = 0;
+let gameRunning = false;
+let timer;
+
+function startGame(){
+
+clearInterval(timer); // prevent double timer
+
+p1 = 0;
+p2 = 0;
+time = 30;
+gameRunning = true;
+
+document.getElementById("result").innerText = "";
+document.getElementById("p1").disabled = false;
+document.getElementById("p2").disabled = false;
+
+document.getElementById("score").innerText = "Score: 0 - 0";
+
+timer = setInterval(function(){
+
+time--;
+document.getElementById("timer").innerText = "Time: " + time;
+
+if(time <= 0){
+endGame();
+}
+
+},1000);
+
+}
+
+function tap(player){
+
+if(!gameRunning) return;
+
+if(player === 1) p1++;
+if(player === 2) p2++;
+
+document.getElementById("score").innerText =
+"Score: " + p1 + " - " + p2;
+
+}
+
+function endGame(){
+
+clearInterval(timer);
+gameRunning = false;
+
+document.getElementById("p1").disabled = true;
+document.getElementById("p2").disabled = true;
+
+let name1 = document.getElementById("player1").value || "Player 1";
+let name2 = document.getElementById("player2").value || "Player 2";
+
+let result = "";
+
+if(p1 > p2){
+coin1 += 100;
+coin2 += 20;
+result = name1 + " Wins! 🏆";
+}
+else if(p2 > p1){
+coin2 += 100;
+coin1 += 20;
+result = name2 + " Wins! 🏆";
+}
+else{
+coin1 += 50;
+coin2 += 50;
+result = "Draw! 🤝";
+}
+
+document.getElementById("coins").innerText =
+"Coins: " + coin1 + " - " + coin2;
+
+document.getElementById("result").innerText = result;
+
+}
+
+</script>
+
+</body>
+</html>
