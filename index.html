@@ -1,157 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Tap Battle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bomb Pass Game</title>
 
 <style>
 
-html,body{
+body{
 margin:0;
-padding:0;
-height:100%;
-overflow:hidden;
 font-family:Arial;
-background:#111;
 color:white;
 text-align:center;
-touch-action:manipulation;
+overflow:hidden;
+background:linear-gradient(-45deg,#0f0f0f,#1a1a2e,#16213e,#0f3460);
+background-size:400% 400%;
+animation:gradient 10s ease infinite;
 }
 
-#startScreen{
-position:absolute;
-width:100%;
-height:100%;
+@keyframes gradient{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+button{
+padding:12px 20px;
+margin:5px;
+border:none;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.menu{
 display:flex;
+flex-direction:column;
 justify-content:center;
 align-items:center;
-}
-
-#startBtn{
-padding:20px 50px;
-font-size:28px;
-border:none;
-border-radius:15px;
-background:#00c853;
-color:white;
-font-weight:bold;
+height:100vh;
+gap:10px;
 }
 
 #game{
 display:none;
-height:100%;
-}
-
-#timer{
-font-size:28px;
-font-weight:bold;
-color:red;
-margin:5px;
-}
-
-#score{
-font-size:22px;
-margin:5px;
 }
 
 .player{
-height:40vh;
+height:35vh;
 display:flex;
 justify-content:center;
 align-items:center;
-}
-
-#p1{
-background:#0072ff;
-}
-
-#p2{
-background:#ff4b2b;
-}
-
-.tapBtn{
-width:90%;
-height:120px;
-font-size:28px;
+font-size:24px;
 font-weight:bold;
-border:none;
-border-radius:20px;
-color:white;
-background:rgba(0,0,0,0.4);
 }
 
-.tapBtn:active{
-transform:scale(0.95);
+#p1{background:#1976d2;}
+#p2{background:#e53935;}
+
+#topBar{
+padding:5px;
 }
 
-.tapBtn:disabled{
-opacity:0.5;
-}
-
-#countdown{
+#result{
 position:fixed;
-top:40%;
-width:100%;
-font-size:90px;
-font-weight:bold;
-display:none;
-}
-
-#winScreen{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
+top:0;left:0;
+width:100%;height:100%;
 background:rgba(0,0,0,0.95);
 display:none;
-flex-direction:column;
 justify-content:center;
 align-items:center;
-font-size:32px;
+flex-direction:column;
+font-size:24px;
 }
 
-/* SHOP */
-#shop{
+.modal{
 position:fixed;
-right:10px;
-top:10px;
-background:#222;
-padding:15px;
-border-radius:15px;
-width:200px;
-font-size:14px;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.9);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+padding:20px;
 }
 
-#shop button{
-padding:10px;
-width:100%;
-border:none;
-background:#ffd600;
-border-radius:10px;
-font-weight:bold;
+.shake{animation:shake 0.3s;}
+
+@keyframes shake{
+0%{transform:translate(0);}
+25%{transform:translate(-8px,5px);}
+50%{transform:translate(8px,-5px);}
+75%{transform:translate(-8px,5px);}
+100%{transform:translate(0);}
 }
 
-#shop input{
-width:100%;
-padding:8px;
-border-radius:8px;
-border:none;
-text-align:center;
-}
-
-/* leaderboard */
-#leaderboard{
+.explosion{
 position:fixed;
-left:10px;
-top:10px;
-background:#222;
-padding:10px;
-border-radius:10px;
-font-size:12px;
-max-width:150px;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+font-size:80px;
+animation:boom 0.8s forwards;
+}
+
+@keyframes boom{
+0%{opacity:1;transform:scale(1);}
+100%{opacity:0;transform:scale(2);}
 }
 
 </style>
@@ -159,270 +113,188 @@ max-width:150px;
 
 <body>
 
-<div id="startScreen">
-<button id="startBtn">START</button>
+<!-- MENU -->
+<div id="menu" class="menu">
+<h1>💣 Bomb Pass Game</h1>
+
+<input type="text" id="name1" placeholder="Player 1 Name">
+<input type="text" id="name2" placeholder="Player 2 Name">
+
+<select id="mode">
+<option value="classic">Classic Mode</option>
+<option value="hardcore">Hardcore (1 Life)</option>
+</select>
+
+<button onclick="startGame()">▶ PLAY</button>
+<button onclick="openDonate()">❤️ Donate</button>
+<button onclick="openSuggest()">💬 Suggestion</button>
 </div>
 
+<!-- GAME -->
 <div id="game">
 
-<div id="timer">30</div>
-<div id="score">0 - 0</div>
-
-<div class="player" id="p1">
-<button class="tapBtn" id="btn1" disabled>TAP</button>
+<div id="topBar">
+Level: <span id="level">1</span> |
+Time: <span id="timer">0</span> |
+Lives: <span id="lives"></span>
 </div>
 
-<div class="player" id="p2">
-<button class="tapBtn" id="btn2" disabled>TAP</button>
-</div>
+<div class="player" id="p1" onclick="passBomb(1)"></div>
+<div class="player" id="p2" onclick="passBomb(2)"></div>
 
 </div>
 
-<!-- SHOP -->
-<div id="shop">
-<h3>💎 PRO</h3>
-<p>2X Tap (3 days)</p>
-<p>₱20 GCash</p>
+<div id="result"></div>
 
-<input type="text" id="codeInput" placeholder="Enter Code">
-<br><br>
-<button onclick="unlockPro()">UNLOCK</button>
-
-<p id="proStatus">Status: FREE</p>
-<p id="proTimer"></p>
+<!-- DONATE MODAL -->
+<div id="donateModal" class="modal">
+<h2>Support the Developer ❤️</h2>
+<p>Scan QR Code Below</p>
+<img src="your-qrcode.png" width="200">
+<br>
+<button onclick="closeDonate()">Close</button>
 </div>
 
-<!-- LEADERBOARD -->
-<div id="leaderboard"></div>
-
-<div id="countdown"></div>
-<div id="winScreen"></div>
+<!-- SUGGESTION MODAL -->
+<div id="suggestModal" class="modal">
+<h2>Send Suggestion 💬</h2>
+<textarea id="suggestText" rows="4" cols="30" placeholder="Write your suggestion..."></textarea>
+<br>
+<button onclick="sendSuggestion()">Send</button>
+<br>
+<button onclick="closeSuggest()">Close</button>
+</div>
 
 <script>
 
-let time=30;
-let p1=0;
-let p2=0;
-let timer;
-let gameRunning=false;
+let p1Lives=3;
+let p2Lives=3;
+let bombHolder=1;
+let time;
+let interval;
+let level=1;
 
-let isPro=false;
-let multiplier=1;
-
-const btn1=document.getElementById("btn1");
-const btn2=document.getElementById("btn2");
-
-document.getElementById("startBtn").addEventListener("click",startGame);
-
-/* MULTI TOUCH FIX */
-btn1.addEventListener("touchstart",(e)=>{
-e.preventDefault();
-tap(1,e.touches.length);
-});
-
-btn2.addEventListener("touchstart",(e)=>{
-e.preventDefault();
-tap(2,e.touches.length);
-});
+let player1Name="";
+let player2Name="";
+let mode="classic";
 
 function startGame(){
 
-document.getElementById("startScreen").style.display="none";
+player1Name=document.getElementById("name1").value||"Player 1";
+player2Name=document.getElementById("name2").value||"Player 2";
+mode=document.getElementById("mode").value;
+
+if(mode==="hardcore"){
+p1Lives=1;
+p2Lives=1;
+}
+
+document.getElementById("menu").style.display="none";
 document.getElementById("game").style.display="block";
 
-let count=3;
-let cd=document.getElementById("countdown");
-
-cd.style.display="block";
-cd.innerText=count;
-
-let interval=setInterval(()=>{
-
-count--;
-
-if(count>0){
-cd.innerText=count;
-}
-else{
-clearInterval(interval);
-cd.style.display="none";
-beginBattle();
+startRound();
 }
 
-},1000);
+function startRound(){
 
-}
+bombHolder=1;
+time=Math.max(3,8-level);
 
-function beginBattle(){
+updateUI();
 
-time=30;
-p1=0;
-p2=0;
-
-gameRunning=true;
-
-btn1.disabled=false;
-btn2.disabled=false;
-
-timer=setInterval(()=>{
+interval=setInterval(()=>{
 
 time--;
 document.getElementById("timer").innerText=time;
 
-if(time<=0){
-endGame();
-}
+if(time<=0) endRound();
 
 },1000);
-
 }
 
-function tap(player,touches=1){
+function passBomb(player){
+if(player!==bombHolder) return;
+bombHolder=(bombHolder===1)?2:1;
+updateUI();
+}
 
-if(!gameRunning) return;
+function endRound(){
 
-let add = touches * multiplier;
+clearInterval(interval);
+document.body.classList.add("shake");
+setTimeout(()=>document.body.classList.remove("shake"),300);
 
-if(player===1){
-p1 += add;
+let boom=document.createElement("div");
+boom.className="explosion";
+boom.innerHTML="💥";
+document.body.appendChild(boom);
+setTimeout(()=>boom.remove(),800);
+
+if(bombHolder===1) p1Lives--;
+else p2Lives--;
+
+level++;
+
+if(p1Lives<=0 || p2Lives<=0){
+showWinner();
 }else{
-p2 += add;
+startRound();
+}
 }
 
-document.getElementById("score").innerText=p1+" - "+p2;
+function updateUI(){
 
-}
+document.getElementById("level").innerText=level;
 
-function endGame(){
+document.getElementById("p1").innerText=
+player1Name+(bombHolder===1?" 🔥":"");
 
-clearInterval(timer);
-gameRunning=false;
+document.getElementById("p2").innerText=
+player2Name+(bombHolder===2?" 🔥":"");
 
-btn1.disabled=true;
-btn2.disabled=true;
-
-/* SAVE SCORE */
-saveScore();
-
-let win=document.getElementById("winScreen");
-win.style.display="flex";
-
-if(p1>p2){
-win.innerHTML="🏆 PLAYER 1 WINS!";
-}
-else if(p2>p1){
-win.innerHTML="🏆 PLAYER 2 WINS!";
-}
-else{
-win.innerHTML="🤝 DRAW!";
-}
-
-/* LOAD LEADERBOARD */
-loadScores();
+document.getElementById("lives").innerHTML=
+player1Name+": ❤️".repeat(p1Lives)+" | "+
+player2Name+": ❤️".repeat(p2Lives);
 
 }
 
-/* ================= PRO SYSTEM ================= */
+function showWinner(){
 
-function unlockPro(){
+document.getElementById("game").style.display="none";
+let result=document.getElementById("result");
+result.style.display="flex";
 
-let code=document.getElementById("codeInput").value;
-
-let validCodes=["VIP123","PRO456","GCASH20"];
-
-if(validCodes.includes(code)){
-activatePro(3);
+if(p1Lives<=0){
+result.innerHTML="🏆 "+player2Name+" WINS!<br><button onclick='location.reload()'>PLAY AGAIN</button>";
 }else{
-alert("Invalid Code");
+result.innerHTML="🏆 "+player1Name+" WINS!<br><button onclick='location.reload()'>PLAY AGAIN</button>";
 }
 
 }
 
-function activatePro(days){
-
-let expiry = new Date().getTime() + (days*24*60*60*1000);
-
-localStorage.setItem("proExpiry",expiry);
-
-checkPro();
-
-alert("PRO Activated!");
-
+function openDonate(){
+document.getElementById("donateModal").style.display="flex";
 }
 
-function checkPro(){
-
-let expiry=localStorage.getItem("proExpiry");
-
-if(expiry && new Date().getTime()<expiry){
-isPro=true;
-multiplier=2;
-document.getElementById("proStatus").innerText="Status: PRO ✅";
-}else{
-isPro=false;
-multiplier=1;
-document.getElementById("proStatus").innerText="Status: FREE ❌";
+function closeDonate(){
+document.getElementById("donateModal").style.display="none";
 }
 
+function openSuggest(){
+document.getElementById("suggestModal").style.display="flex";
 }
 
-/* TIMER DISPLAY */
-setInterval(()=>{
-
-let expiry=localStorage.getItem("proExpiry");
-
-if(expiry){
-
-let remaining=expiry-new Date().getTime();
-
-if(remaining>0){
-
-let h=Math.floor(remaining/(1000*60*60));
-let m=Math.floor((remaining%(1000*60*60))/(1000*60));
-
-document.getElementById("proTimer").innerText="Expires: "+h+"h "+m+"m";
-
-}else{
-document.getElementById("proTimer").innerText="Expired";
+function closeSuggest(){
+document.getElementById("suggestModal").style.display="none";
 }
 
+function sendSuggestion(){
+let text=document.getElementById("suggestText").value;
+if(text.trim()==="") return alert("Write something!");
+alert("Thank you for your suggestion!");
+document.getElementById("suggestText").value="";
+closeSuggest();
 }
-
-},1000);
-
-/* ================= SCOREBOARD ================= */
-
-function saveScore(){
-
-let history=JSON.parse(localStorage.getItem("scores"))||[];
-
-history.push({
-p1:p1,
-p2:p2,
-date:new Date().toLocaleString()
-});
-
-localStorage.setItem("scores",JSON.stringify(history));
-
-}
-
-function loadScores(){
-
-let history=JSON.parse(localStorage.getItem("scores"))||[];
-
-let html="<b>Top Matches</b><br>";
-
-history.slice(-5).reverse().forEach(s=>{
-html+=`${s.p1}-${s.p2}<br>`;
-});
-
-document.getElementById("leaderboard").innerHTML=html;
-
-}
-
-/* INIT */
-checkPro();
-loadScores();
 
 </script>
 
