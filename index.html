@@ -113,6 +113,47 @@ align-items:center;
 font-size:32px;
 }
 
+/* SHOP */
+#shop{
+position:fixed;
+right:10px;
+top:10px;
+background:#222;
+padding:15px;
+border-radius:15px;
+width:200px;
+font-size:14px;
+}
+
+#shop button{
+padding:10px;
+width:100%;
+border:none;
+background:#ffd600;
+border-radius:10px;
+font-weight:bold;
+}
+
+#shop input{
+width:100%;
+padding:8px;
+border-radius:8px;
+border:none;
+text-align:center;
+}
+
+/* leaderboard */
+#leaderboard{
+position:fixed;
+left:10px;
+top:10px;
+background:#222;
+padding:10px;
+border-radius:10px;
+font-size:12px;
+max-width:150px;
+}
+
 </style>
 </head>
 
@@ -137,6 +178,23 @@ font-size:32px;
 
 </div>
 
+<!-- SHOP -->
+<div id="shop">
+<h3>💎 PRO</h3>
+<p>2X Tap (3 days)</p>
+<p>₱20 GCash</p>
+
+<input type="text" id="codeInput" placeholder="Enter Code">
+<br><br>
+<button onclick="unlockPro()">UNLOCK</button>
+
+<p id="proStatus">Status: FREE</p>
+<p id="proTimer"></p>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard"></div>
+
 <div id="countdown"></div>
 <div id="winScreen"></div>
 
@@ -148,13 +206,24 @@ let p2=0;
 let timer;
 let gameRunning=false;
 
+let isPro=false;
+let multiplier=1;
+
 const btn1=document.getElementById("btn1");
 const btn2=document.getElementById("btn2");
 
 document.getElementById("startBtn").addEventListener("click",startGame);
 
-btn1.addEventListener("touchstart",()=>tap(1));
-btn2.addEventListener("touchstart",()=>tap(2));
+/* MULTI TOUCH FIX */
+btn1.addEventListener("touchstart",(e)=>{
+e.preventDefault();
+tap(1,e.touches.length);
+});
+
+btn2.addEventListener("touchstart",(e)=>{
+e.preventDefault();
+tap(2,e.touches.length);
+});
 
 function startGame(){
 
@@ -208,15 +277,16 @@ endGame();
 
 }
 
-function tap(player){
+function tap(player,touches=1){
 
 if(!gameRunning) return;
 
+let add = touches * multiplier;
+
 if(player===1){
-p1++;
-}
-else{
-p2++;
+p1 += add;
+}else{
+p2 += add;
 }
 
 document.getElementById("score").innerText=p1+" - "+p2;
@@ -231,6 +301,9 @@ gameRunning=false;
 btn1.disabled=true;
 btn2.disabled=true;
 
+/* SAVE SCORE */
+saveScore();
+
 let win=document.getElementById("winScreen");
 win.style.display="flex";
 
@@ -244,7 +317,112 @@ else{
 win.innerHTML="🤝 DRAW!";
 }
 
+/* LOAD LEADERBOARD */
+loadScores();
+
 }
+
+/* ================= PRO SYSTEM ================= */
+
+function unlockPro(){
+
+let code=document.getElementById("codeInput").value;
+
+let validCodes=["VIP123","PRO456","GCASH20"];
+
+if(validCodes.includes(code)){
+activatePro(3);
+}else{
+alert("Invalid Code");
+}
+
+}
+
+function activatePro(days){
+
+let expiry = new Date().getTime() + (days*24*60*60*1000);
+
+localStorage.setItem("proExpiry",expiry);
+
+checkPro();
+
+alert("PRO Activated!");
+
+}
+
+function checkPro(){
+
+let expiry=localStorage.getItem("proExpiry");
+
+if(expiry && new Date().getTime()<expiry){
+isPro=true;
+multiplier=2;
+document.getElementById("proStatus").innerText="Status: PRO ✅";
+}else{
+isPro=false;
+multiplier=1;
+document.getElementById("proStatus").innerText="Status: FREE ❌";
+}
+
+}
+
+/* TIMER DISPLAY */
+setInterval(()=>{
+
+let expiry=localStorage.getItem("proExpiry");
+
+if(expiry){
+
+let remaining=expiry-new Date().getTime();
+
+if(remaining>0){
+
+let h=Math.floor(remaining/(1000*60*60));
+let m=Math.floor((remaining%(1000*60*60))/(1000*60));
+
+document.getElementById("proTimer").innerText="Expires: "+h+"h "+m+"m";
+
+}else{
+document.getElementById("proTimer").innerText="Expired";
+}
+
+}
+
+},1000);
+
+/* ================= SCOREBOARD ================= */
+
+function saveScore(){
+
+let history=JSON.parse(localStorage.getItem("scores"))||[];
+
+history.push({
+p1:p1,
+p2:p2,
+date:new Date().toLocaleString()
+});
+
+localStorage.setItem("scores",JSON.stringify(history));
+
+}
+
+function loadScores(){
+
+let history=JSON.parse(localStorage.getItem("scores"))||[];
+
+let html="<b>Top Matches</b><br>";
+
+history.slice(-5).reverse().forEach(s=>{
+html+=`${s.p1}-${s.p2}<br>`;
+});
+
+document.getElementById("leaderboard").innerHTML=html;
+
+}
+
+/* INIT */
+checkPro();
+loadScores();
 
 </script>
 
